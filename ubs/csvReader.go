@@ -12,9 +12,9 @@ import (
 )
 
 type CSVReader struct {
-	config     configModels.UBS
-	Account    []interfaces.Accounts
-	CreditCard []interfaces.Accounts
+	config      configModels.UBS
+	Accounts    []interfaces.Accounts `json:"accounts,omitempty"`
+	CreditCards []interfaces.Accounts `json:"creditCards,omitempty"`
 }
 
 func NewCSVReader(config configModels.UBS) *CSVReader {
@@ -52,10 +52,10 @@ func (r *CSVReader) Read(files ...string) error {
 				re := regexp.MustCompile(`[^\x20-\x7E]+`) // Matches non-printable ASCII
 				if re.ReplaceAllString(row[0], "") == r.config.CSV.FirstItemForBankaccount {
 					account = &models.Account{}
-					r.Account = append(r.Account, account)
+					r.Accounts = append(r.Accounts, account)
 				} else if re.ReplaceAllString(row[0], "") == r.config.CSV.FirstItemForCreditCard {
 					account = &models.CreditCard{}
-					r.CreditCard = append(r.CreditCard, account)
+					r.CreditCards = append(r.CreditCards, account)
 				}
 			}
 
