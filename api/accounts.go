@@ -2,12 +2,13 @@ package api
 
 import (
 	"encoding/json"
+	"fireflyiiiapi/api/models"
 	"fmt"
 	"net/http"
 	"net/url"
 )
 
-func (h *APIHandler) GetAccounts() error {
+func (h *APIHandler) GetAccounts() (*models.AccountArray, error) {
 	baseURL := fmt.Sprintf("%s/api/v1/accounts", h.Url)
 
 	params := url.Values{}
@@ -19,7 +20,7 @@ func (h *APIHandler) GetAccounts() error {
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s?%s", baseURL, params.Encode()), nil)
 	if err != nil {
-		return fmt.Errorf("error creating request: %s", err.Error())
+		return nil, fmt.Errorf("error creating request: %s", err.Error())
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", h.AccesToken))
@@ -28,19 +29,13 @@ func (h *APIHandler) GetAccounts() error {
 
 	body, err := SendRequest(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	var data struct {
-		Accounts []interface{} `json:"data"`
-	}
-	err = json.Unmarshal(body, &data)
+	accounts := models.AccountArray{}
+
+	err = json.Unmarshal(body, &accounts)
 	if err != nil {
-		return fmt.Errorf("error reading response: %s", err.Error())
+		return nil, fmt.Errorf("error reading response: %s", err.Error())
 	}
-
-	for i, o := range data.Accounts {
-		fmt.Println(1000, i, o)
-	}
-
-	return nil
+	return &accounts, nil
 }

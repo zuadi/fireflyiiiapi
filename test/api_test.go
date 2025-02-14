@@ -2,6 +2,7 @@ package test
 
 import (
 	"fireflyiiiapi/api"
+	"fmt"
 	"testing"
 )
 
@@ -61,18 +62,92 @@ func TestGetAllTransactions(t *testing.T) {
 
 func TestGetAccounts(t *testing.T) {
 	fireflyAPI := api.NewAPIHandler(url, token)
-	err := fireflyAPI.GetAccounts()
+	_, err := fireflyAPI.GetAccounts()
 	if err != nil {
 		t.Error(err)
 		return
 	}
 }
 
-func TestAddTransaction(t *testing.T) {
+func TestGetAccountId(t *testing.T) {
 	fireflyAPI := api.NewAPIHandler(url, token)
-	err := fireflyAPI.AddTransaction(api.Deposit, "123.25", "golang test")
+	accounts, err := fireflyAPI.GetAccounts()
 	if err != nil {
 		t.Error(err)
 		return
 	}
+
+	for _, o := range accounts.Data {
+		fmt.Println(1111, o)
+	}
+	t.Log("test account not found")
+	if _, err := accounts.GetAccountId("test"); err != nil {
+		t.Log(err.Error())
+	}
+	t.Log("test account found")
+	if id, err := accounts.GetAccountId("CH14 0023 5235 6639 7040W"); err != nil {
+		t.Error(err)
+	} else {
+		t.Log("id:", id)
+	}
+}
+
+func TestAddTransaction(t *testing.T) {
+	fireflyAPI := api.NewAPIHandler(url, token)
+	accounts, err := fireflyAPI.GetAccounts()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	incomeId, err := accounts.GetAccountId("CH14 0023 5235 6639 7040 W")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	savingId, err := accounts.GetAccountId("CH29 0023 5235 6639 70M1 U")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	t.Log("add deposit")
+	err = fireflyAPI.AddTransactionDeposit(incomeId, "123.25", "Income", "golang test")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	t.Log("add withrawal")
+	err = fireflyAPI.AddTransactionWithdrawals(incomeId, "25.45", "Food", "golang test 2")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	t.Log("add transfer")
+	err = fireflyAPI.AddTransactionTransfer(incomeId, savingId, "25.45", "Umbuchung", "golang test 3")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	err = fireflyAPI.SendTransactions()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+}
+
+func TestSaveToken(t *testing.T) {
+	if err := api.SaveTokenToFile("../dist/secret.bin", token); err != nil {
+		t.Error(err)
+	}
+
+	savedToken, err := api.ReadTokenToFile("../dist/secret.bin")
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Println(token == savedToken)
 }

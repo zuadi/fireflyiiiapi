@@ -61,38 +61,143 @@ func (h *APIHandler) AllTransaction(typ Type) (*models.TransactionArray, error) 
 	return &transactions, nil
 }
 
-func (h *APIHandler) AddTransaction(typ Type, amount, description string) error {
+func (h *APIHandler) AddTransactionDeposit(accountId, amount, category, description string) error {
+	if len(h.Deposits.Transactions) == 0 {
+		h.Deposits.Transactions = make([]models.TransactionSplitStore, 0)
+	}
 
-	transactions := models.TransactionStore{}
-	transactions.Transactions = make([]models.TransactionSplitStore, 0)
-	transactions.Transactions = append(transactions.Transactions, models.TransactionSplitStore{
-		Type:          string(typ),
+	h.Deposits.Transactions = append(h.Deposits.Transactions, models.TransactionSplitStore{
+		Type:          "deposit",
 		Amount:        amount,
 		Description:   description,
+		DestinationId: accountId,
 		Date:          time.Now().Format("2006-01-02T15:04:05-07:00"),
-		SourceId:      "1",
-		DestinationId: "2",
-		CategoryName:  "Food",
+		CategoryName:  category,
 	})
+	return nil
+}
 
-	jsonData, err := json.Marshal(transactions)
-	if err != nil {
-		return err
-	}
-	fmt.Println(123, string(jsonData))
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/v1/transactions", h.Url), bytes.NewBuffer(jsonData))
-	if err != nil {
-		return fmt.Errorf("error creating request: %s", err.Error())
+func (h *APIHandler) AddTransactionWithdrawals(accountId, amount, category, description string) error {
+	if len(h.Withdrawals.Transactions) == 0 {
+		h.Withdrawals.Transactions = make([]models.TransactionSplitStore, 0)
 	}
 
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", h.AccesToken))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
+	h.Withdrawals.Transactions = append(h.Withdrawals.Transactions, models.TransactionSplitStore{
+		Type:         "withdrawal",
+		Amount:       amount,
+		Description:  description,
+		SourceId:     accountId,
+		Date:         time.Now().Format("2006-01-02T15:04:05-07:00"),
+		CategoryName: category,
+	})
+	return nil
+}
 
-	_, err = SendRequest(req)
-	if err != nil {
-		return err
+func (h *APIHandler) AddTransactionTransfer(srcAccountId, dstAccountId, amount, category, description string) error {
+	if len(h.Transfers.Transactions) == 0 {
+		h.Transfers.Transactions = make([]models.TransactionSplitStore, 0)
 	}
 
+	h.Transfers.Transactions = append(h.Transfers.Transactions, models.TransactionSplitStore{
+		Type:          "transfer",
+		Amount:        amount,
+		Description:   description,
+		SourceId:      srcAccountId,
+		DestinationId: dstAccountId,
+		Date:          time.Now().Format("2006-01-02T15:04:05-07:00"),
+		CategoryName:  category,
+	})
+	return nil
+}
+
+func (h *APIHandler) AddTransactionReconsiliation(srcAccountId, dstAccountId, amount, category, description string) error {
+	if len(h.Reconsiliations.Transactions) == 0 {
+		h.Reconsiliations.Transactions = make([]models.TransactionSplitStore, 0)
+	}
+
+	h.Reconsiliations.Transactions = append(h.Reconsiliations.Transactions, models.TransactionSplitStore{
+		Type:          "reconsiliation",
+		Amount:        amount,
+		Description:   description,
+		SourceId:      srcAccountId,
+		DestinationId: dstAccountId,
+		Date:          time.Now().Format("2006-01-02T15:04:05-07:00"),
+		CategoryName:  category,
+	})
+	return nil
+}
+
+func (h *APIHandler) AddTransactionOpeningBalance(srcAccountId, dstAccountId, amount, category, description string) error {
+	if len(h.OpeningBalances.Transactions) == 0 {
+		h.OpeningBalances.Transactions = make([]models.TransactionSplitStore, 0)
+	}
+
+	h.OpeningBalances.Transactions = append(h.OpeningBalances.Transactions, models.TransactionSplitStore{
+		Type:          "opening_balance",
+		Amount:        amount,
+		Description:   description,
+		SourceId:      srcAccountId,
+		DestinationId: dstAccountId,
+		Date:          time.Now().Format("2006-01-02T15:04:05-07:00"),
+		CategoryName:  category,
+	})
+	return nil
+}
+
+func (h *APIHandler) SendTransactions() error {
+	transactions := models.TransactionStore{}
+	for i := 0; i < 4; i++ {
+		switch i {
+		case 0:
+			if len(h.Deposits.Transactions) > 0 {
+				transactions = h.Deposits
+			} else {
+				continue
+			}
+		case 1:
+			if len(h.Withdrawals.Transactions) > 0 {
+				transactions = h.Withdrawals
+			} else {
+				continue
+			}
+		case 2:
+			if len(h.Transfers.Transactions) > 0 {
+				transactions = h.Transfers
+			} else {
+				continue
+			}
+		case 3:
+			if len(h.Reconsiliations.Transactions) > 0 {
+				transactions = h.Reconsiliations
+			} else {
+				continue
+			}
+		case 4:
+			if len(h.OpeningBalances.Transactions) > 0 {
+				transactions = h.OpeningBalances
+			} else {
+				continue
+			}
+		}
+
+		jsonData, err := json.Marshal(transactions)
+		if err != nil {
+			return err
+		}
+
+		req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/v1/transactions", h.Url), bytes.NewBuffer(jsonData))
+		if err != nil {
+			return fmt.Errorf("error creating request: %s", err.Error())
+		}
+
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", h.AccesToken))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Accept", "application/json")
+
+		_, err = SendRequest(req)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
