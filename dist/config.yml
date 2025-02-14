@@ -1,0 +1,7 @@
+ubs:
+  csv:
+    seperator: ;
+    #default 0 but to read irrecular length set it on -1
+    fieldLimit: -1
+    firstItemForBankaccount: "Kontonummer:"
+    firstItemForCreditCard: sep=
