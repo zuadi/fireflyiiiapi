@@ -6,7 +6,7 @@ type CreditCard struct {
 
 func (c *CreditCard) AddData(index int, data []string) {
 	switch index {
-	case 0:
+	case 0, 1:
 		return
 	default:
 		c.Transactions = append(c.Transactions, CreditCardTransaction{

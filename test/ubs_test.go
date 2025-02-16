@@ -10,7 +10,7 @@ import (
 
 func TestReadUBSCSV(t *testing.T) {
 
-	writeFiles := 0 // 0=no 1=first 2 =second 12=both
+	writeFiles := 2 // 0=no (default) 1=first 2 =second 12=both
 
 	c, err := config.ReadConfig("../dist/config.yml")
 	if err != nil {
@@ -18,7 +18,7 @@ func TestReadUBSCSV(t *testing.T) {
 	}
 
 	reader := ubs.NewCSVReader(c.UBS)
-	err = reader.Read("../dist/transactions.csv") //"../dist/transactionsSparen.csv", "../dist/transactionsCreditCard.csv")
+	err = reader.Read("../dist/transactions/transactionsCreditCard.csv") //"../dist/transactions/transactionsPrivatkonto.csv", "../dist/transactions/transactionsSparen.csv", "../dist/transactions/transactionsSteuern.csv", "../dist/transactions/transactionsCreditCard.csv")
 	if err != nil {
 		t.Error(err)
 	}
@@ -30,7 +30,7 @@ func TestReadUBSCSV(t *testing.T) {
 		}
 		defer f.Close()
 
-		data, err := json.Marshal(reader.Accounts)
+		data, err := json.Marshal(reader.GetAllAccountTransaction())
 		if err != nil {
 			t.Error(err)
 		}
@@ -41,13 +41,13 @@ func TestReadUBSCSV(t *testing.T) {
 	}
 
 	if writeFiles == 2 || writeFiles == 12 {
-		f, err := os.OpenFile("../dist/credit.json", os.O_CREATE|os.O_TRUNC, 0666)
+		f, err := os.OpenFile("../dist/credit.json", os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0666)
 		if err != nil {
 			t.Error(err)
 		}
 		defer f.Close()
 
-		data, err := json.Marshal(reader.CreditCards)
+		data, err := json.Marshal(reader.GetAllCreditCardransaction())
 		if err != nil {
 			t.Error(err)
 		}

@@ -33,7 +33,7 @@ func (a *Account) AddData(index int, data []string) {
 	case 8: //skip its empty
 		return
 	default:
-		a.Transactions = append(a.Transactions, Transaction{
+		transaction := Transaction{
 			EndDate:        data[0],
 			EndTime:        data[1],
 			BookingDate:    data[2],
@@ -44,10 +44,14 @@ func (a *Account) AddData(index int, data []string) {
 			SingleAmount:   data[7],
 			Balance:        data[8],
 			TransactionsNr: data[9],
-			Description1:   data[10],
-			Description2:   data[11],
-			Description3:   data[12],
 			Footnotes:      data[13],
-		})
+		}
+
+		transaction.Description1 = AddDescription1(data[10], transaction.Debit != "")
+		transaction.Description2 = AddDescription2(data[11])
+		transaction.Description3 = AddDescription3(data[12], transaction.Debit != "")
+
+		a.Transactions = append(a.Transactions, transaction)
+
 	}
 }

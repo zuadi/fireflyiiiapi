@@ -1,20 +1,20 @@
 package models
 
 type Transaction struct {
-	EndDate        string `json:"endDate,omitempty"`
-	EndTime        string `json:"endTime,omitempty"`
-	BookingDate    string `json:"bokingDate,omitempty"`
-	ValueDate      string `json:"valueDate,omitempty"`
-	Currency       string `json:"curency,omitempty"`
-	Credit         string `json:"credit,omitempty"`
-	Debit          string `json:"debit,omitempty"`
-	SingleAmount   string `json:"singleAmount,omitempty"`
-	Balance        string `json:"balance,omitempty"`
-	TransactionsNr string `json:"transactionNr,omitempty"`
-	Description1   string `json:"description1,omitempty"`
-	Description2   string `json:"description2,omitempty"`
-	Description3   string `json:"description3,omitempty"`
-	Footnotes      string `json:"footenotes,omitempty"`
+	EndDate        string      `json:"endDate,omitempty"`
+	EndTime        string      `json:"endTime,omitempty"`
+	BookingDate    string      `json:"bookingDate,omitempty"`
+	ValueDate      string      `json:"valueDate,omitempty"`
+	Currency       string      `json:"curency,omitempty"`
+	Credit         string      `json:"credit,omitempty"`
+	Debit          string      `json:"debit,omitempty"`
+	SingleAmount   string      `json:"singleAmount,omitempty"`
+	Balance        string      `json:"balance,omitempty"`
+	TransactionsNr string      `json:"transactionNr,omitempty"`
+	Description1   Description `json:"description1,omitempty"`
+	Description2   Description `json:"description2,omitempty"`
+	Description3   Description `json:"description3,omitempty"`
+	Footnotes      string      `json:"footnotes,omitempty"`
 }
 
 type CreditCardTransaction struct {
