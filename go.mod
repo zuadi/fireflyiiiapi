@@ -3,6 +3,7 @@ module fireflyiiiapi
 go 1.21.0
 
 require (
+<<<<<<< HEAD
 	github.com/gin-gonic/gin v1.10.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -34,3 +35,8 @@ require (
 	golang.org/x/text v0.15.0 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
 )
+=======
+	golang.org/x/text v0.22.0
+	gopkg.in/yaml.v3 v3.0.1
+)
+>>>>>>> ef5eafadad09169b6bdf600a12409cb1defab191

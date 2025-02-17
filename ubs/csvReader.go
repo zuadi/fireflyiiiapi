@@ -1,6 +1,7 @@
 package ubs
 
 import (
+	"bufio"
 	"encoding/csv"
 	configModels "fireflyiiiapi/config/models"
 	"fireflyiiiapi/ubs/interfaces"
@@ -9,12 +10,14 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	"golang.org/x/text/encoding/charmap"
 )
 
 type CSVReader struct {
-	config     configModels.UBS
-	Account    []interfaces.Accounts
-	CreditCard []interfaces.Accounts
+	config      configModels.UBS
+	Accounts    []interfaces.Accounts `json:"accounts,omitempty"`
+	CreditCards []interfaces.Accounts `json:"creditCards,omitempty"`
 }
 
 func NewCSVReader(config configModels.UBS) *CSVReader {
@@ -30,7 +33,10 @@ func (r *CSVReader) Read(files ...string) error {
 			return err
 		}
 
-		reader := csv.NewReader(f)
+		// Convert ISO-8859-1 (Latin-1) to UTF-8
+		readerconv := charmap.ISO8859_1.NewDecoder().Reader(f)
+		reader := csv.NewReader(bufio.NewReader(readerconv))
+
 		reader.Comma = rune(r.config.CSV.Seperator[0])
 		reader.FieldsPerRecord = r.config.CSV.FieldLimit
 
@@ -52,10 +58,10 @@ func (r *CSVReader) Read(files ...string) error {
 				re := regexp.MustCompile(`[^\x20-\x7E]+`) // Matches non-printable ASCII
 				if re.ReplaceAllString(row[0], "") == r.config.CSV.FirstItemForBankaccount {
 					account = &models.Account{}
-					r.Account = append(r.Account, account)
+					r.Accounts = append(r.Accounts, account)
 				} else if re.ReplaceAllString(row[0], "") == r.config.CSV.FirstItemForCreditCard {
 					account = &models.CreditCard{}
-					r.CreditCard = append(r.CreditCard, account)
+					r.CreditCards = append(r.CreditCards, account)
 				}
 			}
 
@@ -66,4 +72,12 @@ func (r *CSVReader) Read(files ...string) error {
 	}
 
 	return nil
+}
+
+func (r *CSVReader) GetAllAccountTransaction() []interfaces.Accounts {
+	return r.Accounts
+}
+
+func (r *CSVReader) GetAllCreditCardransaction() []interfaces.Accounts {
+	return r.CreditCards
 }

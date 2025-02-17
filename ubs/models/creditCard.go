@@ -1,19 +1,19 @@
 package models
 
 type CreditCard struct {
-	Transactions []CreditCardTransaction
+	Transactions []CreditCardTransaction `json:"transactions,omitempty"`
 }
 
 func (c *CreditCard) AddData(index int, data []string) {
 	switch index {
-	case 0:
+	case 0, 1:
 		return
 	default:
 		c.Transactions = append(c.Transactions, CreditCardTransaction{
 			AccountNumber:   data[0],
-			CardNUmber:      data[1],
+			CardNumber:      data[1],
 			CardHolder:      data[2],
-			BuyDate:         data[3],
+			PurcaseDate:     data[3],
 			BookingText:     data[4],
 			Branch:          data[5],
 			Amount:          data[6],

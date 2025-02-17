@@ -1,15 +1,15 @@
 package models
 
 type Account struct {
-	AccountNumber        string
-	IBAN                 string
-	From                 string
-	To                   string
-	StartBalance         string
-	EndBalance           string
-	Currency             string
-	NumberOfTransactions string
-	Transactions         []Transaction
+	AccountNumber        string        `json:"accountNumber,omitempty"`
+	IBAN                 string        `json:"iban,omitempty"`
+	From                 string        `json:"from,omitempty"`
+	To                   string        `json:"to,omitempty"`
+	StartBalance         string        `json:"startBalance,omitempty"`
+	EndBalance           string        `json:"endBalance,omitempty"`
+	Currency             string        `json:"curency,omitempty"`
+	NumberOfTransactions string        `json:"numberOfTrnsactions,omitempty"`
+	Transactions         []Transaction `json:"transactions,omitempty"`
 }
 
 func (a *Account) AddData(index int, data []string) {
@@ -30,23 +30,28 @@ func (a *Account) AddData(index int, data []string) {
 		a.Currency = data[1]
 	case 7:
 		a.NumberOfTransactions = data[1]
+	case 8: //skip its empty
+		return
 	default:
-		a.Transactions = append(a.Transactions, Transaction{
+		transaction := Transaction{
 			EndDate:        data[0],
 			EndTime:        data[1],
-			BookDate:       data[2],
-			ValudaDate:     data[3],
-			Valutadatum:    data[4],
-			Currency:       data[5],
-			Credit:         data[6],
-			Depit:          data[7],
-			SingleAmount:   data[8],
-			Balance:        data[9],
-			TransactionsNr: data[10],
-			Description1:   data[11],
-			Description2:   data[12],
-			Description3:   data[13],
-			Fotenote:       data[14],
-		})
+			BookingDate:    data[2],
+			ValueDate:      data[3],
+			Currency:       data[4],
+			Credit:         data[5],
+			Debit:          data[6],
+			SingleAmount:   data[7],
+			Balance:        data[8],
+			TransactionsNr: data[9],
+			Footnotes:      data[13],
+		}
+
+		transaction.Description1 = AddDescription1(data[10], transaction.Debit != "")
+		transaction.Description2 = AddDescription2(data[11])
+		transaction.Description3 = AddDescription3(data[12], transaction.Debit != "")
+
+		a.Transactions = append(a.Transactions, transaction)
+
 	}
 }
