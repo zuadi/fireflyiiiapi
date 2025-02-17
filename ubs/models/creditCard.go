@@ -25,6 +25,4 @@ func (c *CreditCard) AddData(index int, data []string) {
 			Booking:         data[12],
 		})
 	}
-
-	//do nothing
 }
